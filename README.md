@@ -20,25 +20,10 @@ The Software Requirements Specification is available in [[SRS AutoMox](https://d
 | 23301197   | Md. Hafizur Rahman   |
 
 ## Tech Stack
-
-- **Frontend:** React.js
-- **Backend:** Node.js + Express.js
-- **Database:** MongoDB + Mongoose
-- **Authentication:** OTP (email/phone) with JWT
-- **Payment Gateway:** SSLCommerz
-- **External API:** VIN Decoder (NHTSA)
-- **Hosting (planned):** Vercel (frontend), Heroku/DigitalOcean (backend)
-
-## Features
-
-## Tech Stack
-
-- **Frontend:** React.js
-- **Backend:** Node.js + Express.js
-- **Database:** MongoDB + Mongoose
-- **Authentication:** OTP (email/phone) with JWT
-- **Payment Gateway:** SSLCommerz
-- **External API:** VIN Decoder
+- **M**ongoDB (Atlas)
+- **E**xpress.js
+- **R**eact (Vite)
+- **N**ode.js
 
 ## Features
 
@@ -71,10 +56,32 @@ The Software Requirements Specification is available in [[SRS AutoMox](https://d
 - Analytics dashboard (inventory value, most viewed)
 - Approve/reject user documents
 - Price drop alerts for wishlisted cars
+
+
+
+## 🛠️ Pre-requisites
+
+Before you start, ensure you have the following installed on your machine:
+- **Node.js** (LTS version recommended)
+- **Git**
+- **npm** (usually comes with Node)
+
+## 🚀 Getting Started for Team Members
+
+Follow these steps exactly to get the project running on your local machine:
+
+### 1. Clone and Navigate
+```bash
+git clone https://github.com/Hafiz-110/AutoMoX.git
+cd AutoMoX
+git checkout dev
+```
 ## Getting Started
+1. Clone the repository.
+2. Go to the `server` folder and run `npm install`.
+3. Create a `.env` file in the `server` folder (use `.env.example` as a template).
+4. Go to the `client` folder and run `npm install`.
 
-### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
-- MongoDB (local or Atlas)
-
+## How to Run
+- **Backend:** `cd server && npm run dev`
+- **Frontend:** `cd client && npm run dev`
