@@ -31,20 +31,46 @@ The Software Requirements Specification is available in [[SRS AutoMox](https://d
 
 ## Features
 
-- Car discovery with filters (make, model, fuel type, price)
-- Side-by-side comparison of up to 4 vehicles
-- Interactive image gallery
-- Wishlist for saving cars
-- Loan calculator and trade-in valuation
-- PDF summary generation
-- Test drive booking with calendar and status tracking
-- Verified buyer reviews and ratings
-- FAQ chatbot
-- Vehicle personalization (colors and add-ons)
-- Admin panel with VIN auto-population
-- Analytics dashboard
-- Price drop notifications
+## Tech Stack
 
+- **Frontend:** React.js
+- **Backend:** Node.js + Express.js
+- **Database:** MongoDB + Mongoose
+- **Authentication:** OTP (email/phone) with JWT
+- **Payment Gateway:** SSLCommerz
+- **External API:** VIN Decoder
+
+## Features
+
+### Car Discovery
+- Filter by make, model, fuel type, price
+- Compare up to 4 vehicles side by side
+- Interactive image gallery (multiple angles)
+- Wishlist to save cars for later
+
+### Financial Tools
+- Monthly loan calculator
+- Trade-in valuation (age, mileage, condition)
+- Downloadable PDF summary
+- Secure booking fee payment via SSLCommerz
+
+### User Interaction
+- Test drive booking with calendar
+- Track booking status (Pending, Confirmed, Completed)
+- Verified buyer reviews and ratings
+- FAQ chatbot for common questions
+
+### Vehicle Personalization
+- Change exterior color with preview
+- Select add-ons (rims, interior) with real-time price update
+
+### Admin Management
+- Add cars using VIN (auto-populate data)
+- Update price, stock, specifications
+- Delete/archive sold cars
+- Analytics dashboard (inventory value, most viewed)
+- Approve/reject user documents
+- Price drop alerts for wishlisted cars
 ## Getting Started
 
 ### Prerequisites
@@ -52,9 +78,3 @@ The Software Requirements Specification is available in [[SRS AutoMox](https://d
 - npm or yarn
 - MongoDB (local or Atlas)
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/Hafiz-110/AutoMoX.git
-   cd AutoMoX
