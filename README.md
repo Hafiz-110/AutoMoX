@@ -8,8 +8,8 @@ AutoMoX is a web platform that connects car buyers with dealerships. Users can b
 
 ## SRS Document
 
-The Software Requirements Specification is available in [SRS AutoMox](https://docs.google.com/document/u/2/d/1riIwhdvCP0LnE8zrBjIZh9vVYULgZjSTW_l4ftaPJPU/edit)
-
+The Software Requirements Specification is available in [[SRS AutoMox](https://docs.google.com/document/u/2/d/1riIwhdvCP0LnE8zrBjIZh9vVYULgZjSTW_l4ftaPJPU/edit)
+]
 ## Team Members
 
 | Student ID | Name                 |
