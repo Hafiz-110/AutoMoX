@@ -1,30 +1,20 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import API from './api' // Import your custom instance
+import React from 'react';
+import Discovery from './pages/Discovery'; // Make sure the file name is Discovery.jsx
+import './App.css';
 
 function App() {
-  const [message, setMessage] = useState("Loading...")
-
-  useEffect(() => {
-    // Notice we only put '/' because the baseURL handles the rest!
-    API.get('/')
-      .then(res => {
-        setMessage(res.data)
-      })
-      .catch(err => {
-        console.error(err)
-        setMessage("Backend is not reaching out ❌")
-      })
-  }, [])
-
   return (
     <div className="App">
-      <h1>MERN Team Project</h1>
-      <div className="card">
-        <p>Backend Status: <strong>{message}</strong></p>
-      </div>
+      <header style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '1.5rem', textAlign: 'center' }}>
+        <h1 style={{ margin: 0, letterSpacing: '2px' }}>AutoMoX | Premium Car Discovery</h1>
+      </header>
+      
+      <main>
+        {/* This line activates your features */}
+        <Discovery />
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
