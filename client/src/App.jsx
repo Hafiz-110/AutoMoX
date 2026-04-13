@@ -1,28 +1,28 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import API from './api' // Import your custom instance
+import API from './api'
+import AdminVerification from './components/AdminVerification'
 
 function App() {
-  const [message, setMessage] = useState("Loading...")
+  const [status, setStatus] = useState("Connecting...")
 
   useEffect(() => {
-    // Notice we only put '/' because the baseURL handles the rest!
     API.get('/')
-      .then(res => {
-        setMessage(res.data)
-      })
-      .catch(err => {
-        console.error(err)
-        setMessage("Backend is not reaching out ❌")
-      })
+      .then(res => setStatus(res.data))
+      .catch(() => setStatus("Offline ❌"))
   }, [])
 
   return (
     <div className="App">
-      <h1>MERN Team Project</h1>
-      <div className="card">
-        <p>Backend Status: <strong>{message}</strong></p>
-      </div>
+      <header style={{ borderBottom: '1px solid #444', marginBottom: '20px' }}>
+        <h1>AutoMoX Admin Portal</h1>
+        <p>Server Status: <strong>{status}</strong></p>
+      </header>
+
+      <main className="card">
+        {/* Feature 19 Component */}
+        <AdminVerification />
+      </main>
     </div>
   )
 }
