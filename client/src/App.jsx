@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react'
 import './App.css'
-import API from './api' // Import your custom instance
+import API from './api' 
+import BookingForm from './components/BookingForm' // Import the new component
 
 function App() {
   const [message, setMessage] = useState("Loading...")
 
   useEffect(() => {
-    // Notice we only put '/' because the baseURL handles the rest!
     API.get('/')
       .then(res => {
         setMessage(res.data)
@@ -19,10 +19,16 @@ function App() {
 
   return (
     <div className="App">
-      <h1>MERN Team Project</h1>
+      <h1>AutoMoX Portal</h1>
+      
       <div className="card">
         <p>Backend Status: <strong>{message}</strong></p>
       </div>
+
+      <hr style={{ margin: '20px 0', opacity: '0.2' }} />
+
+      {/* Feature 1: Book Test Drive */}
+      <BookingForm />
     </div>
   )
 }
