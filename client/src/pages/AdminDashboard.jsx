@@ -37,118 +37,7 @@ const Tab = ({ label, active, onClick, badge }) => (
   </button>
 );
 
-// ─── FEATURE 18: Analytics Dashboard ──────────────────────────────────────
-const AnalyticsDashboard = () => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    axios.get(`${API}/admin/analytics`)
-      .then(r => setData(r.data))
-      .catch(console.error)
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) return <div style={{ color: '#666', textAlign: 'center', padding: 48 }}>Loading analytics…</div>;
-  if (!data) return <div style={{ color: '#f87171' }}>Failed to load analytics.</div>;
-
-  const stockMap = {};
-  (data.stockBreakdown || []).forEach(s => { stockMap[s._id] = s.count; });
-
-  const stockColors = { available: '#4ade80', reserved: '#facc15', sold: '#f87171', archived: '#555' };
-
-  return (
-    <div>
-      {/* KPI Row */}
-      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginBottom: 24 }}>
-        <StatCard label="Total Inventory" value={data.totalInventory} accent="#e8c96a" />
-        <StatCard label="Inventory Value" value={`$${(data.totalInventoryValue || 0).toLocaleString()}`} accent="#4ade80" />
-        <StatCard label="Avg. Price" value={`$${(data.averagePrice || 0).toLocaleString()}`} accent="#60a5fa" />
-        <StatCard label="Available" value={stockMap.available || 0} accent="#4ade80" sub="vehicles" />
-        <StatCard label="Reserved" value={stockMap.reserved || 0} accent="#facc15" sub="vehicles" />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 24 }}>
-        {/* Most Viewed Cars */}
-        <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 12, padding: 24 }}>
-          <h3 style={{ margin: '0 0 16px', color: '#e8c96a', fontSize: 16, fontWeight: 800 }}>🔥 Most Viewed Cars</h3>
-          {(data.topViewedCars || []).map((car, i) => (
-            <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < data.topViewedCars.length - 1 ? '1px solid #222' : 'none' }}>
-              <span style={{ color: '#555', fontWeight: 800, fontSize: 18, width: 24 }}>#{i + 1}</span>
-              <div style={{ flex: 1 }}>
-                <div style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>{car.year} {car.make} {car.model}</div>
-                <div style={{ color: '#888', fontSize: 12 }}>${(car.price || 0).toLocaleString()}</div>
-              </div>
-              <div style={{ color: '#e8c96a', fontWeight: 800, fontSize: 14 }}>{car.viewCount} views</div>
-              <span style={{ padding: '3px 8px', borderRadius: 99, fontSize: 11, background: stockColors[car.stockStatus] + '22', color: stockColors[car.stockStatus], border: `1px solid ${stockColors[car.stockStatus]}` }}>
-                {car.stockStatus}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Make Breakdown */}
-        <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 12, padding: 24 }}>
-          <h3 style={{ margin: '0 0 16px', color: '#e8c96a', fontSize: 16, fontWeight: 800 }}>🏷️ Inventory by Make</h3>
-          {(data.makeBreakdown || []).map(m => {
-            const pct = data.totalInventory ? Math.round((m.count / data.totalInventory) * 100) : 0;
-            return (
-              <div key={m._id} style={{ marginBottom: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ color: '#ccc', fontSize: 13 }}>{m._id}</span>
-                  <span style={{ color: '#888', fontSize: 12 }}>{m.count} ({pct}%)</span>
-                </div>
-                <div style={{ background: '#0f0f0f', borderRadius: 4, height: 6, overflow: 'hidden' }}>
-                  <div style={{ width: `${pct}%`, height: '100%', background: 'linear-gradient(90deg, #c8a951, #e8c96a)', borderRadius: 4, transition: 'width 1s ease' }} />
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Fuel Breakdown + Recent Listings */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20 }}>
-        <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 12, padding: 24 }}>
-          <h3 style={{ margin: '0 0 16px', color: '#e8c96a', fontSize: 16, fontWeight: 800 }}>⛽ By Fuel Type</h3>
-          {(data.fuelBreakdown || []).map(f => (
-            <div key={f._id} style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #222', alignItems: 'center' }}>
-              <span style={{ color: '#ccc', fontSize: 13 }}>{f._id}</span>
-              <span style={{ color: '#e8c96a', fontWeight: 700, fontSize: 14 }}>{f.count}</span>
-            </div>
-          ))}
-        </div>
-
-        <div style={{ background: '#1a1a1a', border: '1px solid #333', borderRadius: 12, padding: 24 }}>
-          <h3 style={{ margin: '0 0 16px', color: '#e8c96a', fontSize: 16, fontWeight: 800 }}>🕐 Recently Added</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #333' }}>
-                {['Vehicle', 'Year', 'Price', 'Status'].map(h => (
-                  <th key={h} style={{ textAlign: 'left', padding: '0 0 10px', color: '#555', fontSize: 12, fontWeight: 600, textTransform: 'uppercase', letterSpacing: 1 }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(data.recentListings || []).map(car => (
-                <tr key={car._id} style={{ borderBottom: '1px solid #1f1f1f' }}>
-                  <td style={{ padding: '10px 0', color: '#fff', fontSize: 14 }}>{car.make} {car.model}</td>
-                  <td style={{ padding: '10px 0', color: '#888', fontSize: 13 }}>{car.year}</td>
-                  <td style={{ padding: '10px 0', color: '#4ade80', fontSize: 13, fontWeight: 700 }}>${(car.price || 0).toLocaleString()}</td>
-                  <td style={{ padding: '10px 0' }}>
-                    <span style={{ padding: '2px 8px', borderRadius: 99, fontSize: 11, background: (stockColors[car.stockStatus] || '#555') + '22', color: stockColors[car.stockStatus] || '#888', border: `1px solid ${stockColors[car.stockStatus] || '#555'}` }}>
-                      {car.stockStatus}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // ─── FEATURE 15 + 16 + 17: Inventory Manager ──────────────────────────────
 const InventoryManager = () => {
@@ -227,18 +116,7 @@ const InventoryManager = () => {
     }
   };
 
-  // Feature 17: Delete / Archive
-  const handleDelete = async (car, archive = false) => {
-    const action = archive ? 'archive' : 'permanently delete';
-    if (!window.confirm(`Are you sure you want to ${action} the ${car.year} ${car.make} ${car.model}?`)) return;
-    try {
-      await axios.delete(`${API}/admin/cars/${car._id}${archive ? '?archive=true' : ''}`);
-      showAlert('success', archive ? 'Car archived.' : 'Car deleted permanently.');
-      fetchCars();
-    } catch (err) {
-      showAlert('error', err.response?.data?.error || 'Operation failed.');
-    }
-  };
+  
 
   const stockColors = { available: '#4ade80', reserved: '#facc15', sold: '#f87171', archived: '#555' };
 
@@ -331,8 +209,7 @@ const InventoryManager = () => {
                       <td style={{ padding: '14px 0' }}>
                         <div style={{ display: 'flex', gap: 8 }}>
                           <button onClick={() => { setEditingCar(car); setEditForm({ price: car.price, stockStatus: car.stockStatus, color: car.color, fuelType: car.fuelType }); }} style={{ padding: '6px 14px', background: '#1e3a5f', color: '#60a5fa', border: '1px solid #2563eb', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Edit</button>
-                          <button onClick={() => handleDelete(car, true)} style={{ padding: '6px 14px', background: '#2a2006', color: '#facc15', border: '1px solid #ca8a04', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Archive</button>
-                          <button onClick={() => handleDelete(car, false)} style={{ padding: '6px 14px', background: '#2b0d0d', color: '#f87171', border: '1px solid #ef4444', borderRadius: 6, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>Delete</button>
+                          
                         </div>
                       </td>
                     </tr>
@@ -384,7 +261,7 @@ const InventoryManager = () => {
 
 // ─── MAIN ADMIN DASHBOARD ──────────────────────────────────────────────────
 const AdminDashboard = () => {
-  const [activeTab, setActiveTab] = useState('analytics');
+  const [activeTab, setActiveTab] = useState('inventory');
 
   return (
     <div style={{ minHeight: '100vh', background: '#0f0f0f', fontFamily: "'Helvetica Neue', Arial, sans-serif", color: '#fff' }}>
@@ -403,7 +280,7 @@ const AdminDashboard = () => {
       {/* Nav Tabs */}
       <div style={{ borderBottom: '1px solid #1a1a1a', padding: '0 32px' }}>
         <div style={{ maxWidth: 1400, margin: '0 auto', display: 'flex', gap: 8, paddingTop: 16, paddingBottom: 0 }}>
-          <Tab label="📊 Analytics" active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} />
+          
           <Tab label="🚗 Inventory" active={activeTab === 'inventory'} onClick={() => setActiveTab('inventory')} />
         </div>
       </div>
