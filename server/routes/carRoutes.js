@@ -1,8 +1,8 @@
-const express = require('express');
-const router = express.Router();
-const carController = require('../controllers/carController');
+const express = require("express");
+const router  = express.Router();
+const { downloadCarPDF } = require("../controllers/pdfController");
+const { protect }        = require("../middleware/authMiddleware");
 
-// This connects the URL /api/cars/ to your filtering logic
-router.get('/', carController.getFilteredCars);
+router.get("/:carId/pdf", protect, downloadCarPDF);
 
 module.exports = router;
