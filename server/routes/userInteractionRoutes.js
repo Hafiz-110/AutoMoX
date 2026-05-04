@@ -11,7 +11,11 @@ router.post('/add-wishlist', controller.addToWishlist);
 router.delete('/delete-last-review', controller.deleteLastReview);
 router.delete('/delete-last-wishlist', controller.deleteLastWishlist);
 
+// 3. GET Routes
+router.get('/cars/:id', controller.getCarById);
+// backend/routes/userInteractionRoutes.js
 
-router.delete('/remove-watchlist/:wishlistId', controller.removeFromWishlist);
+// Change the old 'remove-watchlist/:wishlistId' to this:
+router.delete('/remove-wishlist/:userId/:carId', controller.removeFromWishlist);
 
 module.exports = router;

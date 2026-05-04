@@ -1,4 +1,8 @@
+import ReviewForm from '../components/Reviews/ReviewForm';
+import WishlistButton from '../components/Wishlist/WishlistButton';
+import axios from 'axios';
 import React, { useState } from 'react';
+
 
 const localCars = [
   { id: 1, make: "Tesla", model: "Model 3", price: 45000, fuel: "Electric", year: 2024, range: "350 miles", speed: "145 mph", img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400" },
@@ -14,13 +18,28 @@ const localCars = [
 
 const Discovery = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [priceRange, setPriceRange] = useState(100000); // Default to max
+  const [priceRange, setPriceRange] = useState(100000);
   const [selectedCars, setSelectedCars] = useState([]);
+  const [activeCarId, setActiveCarId] = useState(null);
 
-  const filteredCars = localCars.filter(car => 
+  const filteredCars = localCars.filter(car =>
     car.make.toLowerCase().includes(searchTerm.toLowerCase()) &&
     car.price <= priceRange
   );
+
+  const handleWatch = async (car) => {
+    try {
+      await axios.post('http://localhost:5000/api/add-wishlist', {
+        type: 'watch',
+        carId: car.id.toString(),
+        userId: "User1"
+      });
+      setActiveCarId(car.id);
+      alert(`${car.make} ${car.model} is now being tracked.`);
+    } catch (err) {
+      alert("Error saving to database. Make sure your server is running.");
+    }
+  };
 
   const toggleCompare = (car) => {
     if (selectedCars.find(c => c.id === car.id)) {
@@ -33,13 +52,13 @@ const Discovery = () => {
   return (
     <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
       <div style={{ maxWidth: '1200px', margin: 'auto' }}>
-        
+
         {/* Header and Controls */}
         <div style={{ background: '#fff', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
           <h1 style={{ marginBottom: '20px' }}>AutoMoX | Discovery Dashboard</h1>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'center' }}>
-            <input 
-              placeholder="Search by Make..." 
+            <input
+              placeholder="Search by Make..."
               onChange={(e) => setSearchTerm(e.target.value)}
               style={{ flex: '1', minWidth: '250px', padding: '12px', borderRadius: '10px', border: '1px solid #e2e8f0' }}
             />
@@ -47,8 +66,8 @@ const Discovery = () => {
               <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>
                 Max Price: ${priceRange.toLocaleString()}
               </label>
-              <input 
-                type="range" min="20000" max="100000" step="5000"
+              <input
+                type="range" min="20000" max="230000" step="5000"
                 value={priceRange} onChange={(e) => setPriceRange(e.target.value)}
                 style={{ width: '100%', cursor: 'pointer' }}
               />
@@ -63,31 +82,68 @@ const Discovery = () => {
               <img src={car.img} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt={car.model} />
               <div style={{ padding: '20px' }}>
                 <h3 style={{ margin: '0' }}>{car.make} {car.model}</h3>
-                <p style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '1.2rem', margin: '10px 0' }}>${car.price.toLocaleString()}</p>
-                
-                {/* Stats Section */}
+                <p style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '1.2rem', margin: '10px 0' }}>
+                  ${car.price.toLocaleString()}
+                </p>
+
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', background: '#f8fafc', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
-                   <div>📅 {car.year}</div>
-                   <div>⛽ {car.fuel}</div>
-                   <div>🏎️ {car.speed}</div>
-                   <div>🔋 {car.range}</div>
+                  <div>📅 {car.year}</div>
+                  <div>⛽ {car.fuel}</div>
+                  <div>🏎️ {car.speed}</div>
+                  <div>🔋 {car.range}</div>
                 </div>
 
-                <button 
+                <button
                   onClick={() => toggleCompare(car)}
-                  style={{ 
+                  style={{
                     width: '100%', padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                    background: selectedCars.find(c => c.id === car.id) ? '#ef4444' : '#2563eb', color: 'white', fontWeight: 'bold'
+                    background: selectedCars.find(c => c.id === car.id) ? '#ef4444' : '#2563eb', color: 'white', fontWeight: 'bold', marginBottom: '10px'
                   }}
                 >
                   {selectedCars.find(c => c.id === car.id) ? 'Remove Compare' : 'Add to Compare'}
                 </button>
+
+                {/* WATCH / REVIEW / WISHLIST LOGIC */}
+                <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginTop: '10px' }}>
+                  {activeCarId !== car.id ? (
+                    <button
+                      onClick={() => handleWatch(car)}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        borderRadius: '10px',
+                        border: 'none',
+                        background: '#2563eb', // The exact blue you used for Compare
+                        color: 'white',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      👁️ Watch This Car
+                    </button>
+                  ) : (
+                    <div>
+                      <p style={{ fontSize: '0.8rem', color: '#059669', marginBottom: '10px' }}>✅ Currently Tracking</p>
+                      <WishlistButton carId={car.id.toString()} userId="User1" />
+                      <div style={{ marginTop: '10px' }}>
+                        <ReviewForm carId={car.id.toString()} userId="User1" />
+                      </div>
+                      <button
+                        onClick={() => setActiveCarId(null)}
+                        style={{ width: '100%', marginTop: '10px', background: 'none', border: 'none', color: '#666', fontSize: '0.7rem', cursor: 'pointer' }}
+                      >
+                        Close Forms
+                      </button>
+                  
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Comparison Modal (Feature 2) */}
+        {/* Comparison Modal */}
         {selectedCars.length > 0 && (
           <div style={{ marginTop: '50px', background: '#fff', padding: '30px', borderRadius: '20px', border: '2px solid #2563eb' }}>
             <h2 style={{ color: '#1e293b' }}>Technical Comparison</h2>

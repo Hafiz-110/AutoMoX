@@ -1,5 +1,6 @@
 const Review = require('../models/Review');
 const Wishlist = require('../models/Wishlist');
+const Car = require('../models/Car');
 
 //Feature 11:Add Review
 exports.addReview = async (req, res) => {
@@ -23,15 +24,16 @@ exports.addReview = async (req, res) => {
 // Feature 4: Add to Wishlist
 exports.addToWishlist = async (req, res) => {
     try {
-        const { type } = req.body;
+        // GET THE ACTUAL ID FROM THE CLICKED CAR
+        const { carId, userId, type } = req.body;
 
         const updatedItem = await Wishlist.findOneAndUpdate(
-            { carId: "123", userId: "User1" }, 
-            { 
+            { carId: carId, userId: userId }, // Use variables, NOT "123"
+            {
                 $set: { status: type || "wishlist" },
-                $setOnInsert: { wishlistId: "WISH-" + Date.now() } 
-            }, 
-            { upsert: true, new: true } 
+                $setOnInsert: { wishlistId: "WISH-" + Date.now() }
+            },
+            { upsert: true, new: true } // Upsert: true is what creates the new entry
         );
 
         res.status(201).json({ item: updatedItem });
@@ -44,10 +46,10 @@ exports.addToWishlist = async (req, res) => {
 
 exports.deleteLastWishlist = async (req, res) => {
     try {
-        
-        const result = await Wishlist.deleteMany({ 
-            carId: "123", 
-            userId: "User1" 
+
+        const result = await Wishlist.deleteMany({
+            carId: "123",
+            userId: "User1"
         });
 
         res.status(200).json({ message: `Deleted ${result.deletedCount} items.` });
@@ -67,12 +69,35 @@ exports.deleteLastReview = async (req, res) => {
 };
 
 
+// backend/controller/userInteractionController.js
+
 exports.removeFromWishlist = async (req, res) => {
     try {
-        const { wishlistId } = req.params;
-        await Wishlist.findOneAndDelete({ wishlistId });
-        res.status(200).json({ message: "Item removed from wishlist" });
-    } catch (error) {
-        res.status(500).json({ message: "Error removing item" });
+        // These names MUST match the names in your route file
+        const { userId, carId } = req.params;
+
+        // Log this to your terminal so you can see it working!
+        console.log(`DELETE request received for User: ${userId}, Car: ${carId}`);
+
+        const result = await Wishlist.findOneAndDelete({ userId, carId });
+
+        if (result) {
+            res.status(200).json({ message: "Removed successfully" });
+        } else {
+            res.status(404).json({ message: "Item not found in database" });
+        }
+    } catch (err) {
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+exports.getCarById = async (req, res) => {
+    try {
+        const car = await Car.findById(req.params.id);
+        if (!car) return res.status(404).json({ message: "Car not found" });
+        res.json(car);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
 };

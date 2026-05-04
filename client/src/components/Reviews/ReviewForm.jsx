@@ -23,7 +23,22 @@ const ReviewForm = ({ carId, userId }) => {
             <h4>Leave a Review</h4>
             <input type="number" min="1" max="5" value={rating} onChange={(e) => setRating(e.target.value)} />
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Your comment..." />
-            <button type="submit">Submit</button>
+            <button
+                type="submit"
+                style={{
+                    width: '100%',
+                    padding: '10px',
+                    borderRadius: '10px',
+                    border: 'none',
+                    background: '#2563eb',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    marginTop: '10px'
+                }}
+            >
+                Submit Review
+            </button>
         </form>
     );
 };

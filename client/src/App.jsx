@@ -1,18 +1,15 @@
 import React from 'react';
-import Discovery from './pages/Discovery'; // Make sure the file name is Discovery.jsx
-import './App.css';
+import Discovery from './pages/Discovery';
+import Login from './pages/Login';
 
 function App() {
+  // Check the current URL path
+  const path = window.location.pathname;
+
   return (
     <div className="App">
-      <header style={{ backgroundColor: '#1a1a1a', color: 'white', padding: '1.5rem', textAlign: 'center' }}>
-        <h1 style={{ margin: 0, letterSpacing: '2px' }}>AutoMoX | Premium Car Discovery</h1>
-      </header>
-      
-      <main>
-        {/* This line activates your features */}
-        <Discovery />
-      </main>
+      {/* Basic Routing Logic */}
+      {path === '/login' ? <Login /> : <Discovery />}
     </div>
   );
 }
