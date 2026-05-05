@@ -3,7 +3,6 @@ import WishlistButton from '../components/Wishlist/WishlistButton';
 import axios from 'axios';
 import React, { useState } from 'react';
 
-
 const localCars = [
   { id: 1, make: "Tesla", model: "Model 3", price: 45000, fuel: "Electric", year: 2024, range: "350 miles", speed: "145 mph", img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400" },
   { id: 2, make: "Toyota", model: "Camry", price: 28000, fuel: "Petrol", year: 2023, range: "450 miles", speed: "135 mph", img: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400" },
@@ -103,6 +102,26 @@ const Discovery = () => {
                   {selectedCars.find(c => c.id === car.id) ? 'Remove Compare' : 'Add to Compare'}
                 </button>
 
+                {/* FEATURE 13 & 14 LINK: Personalization Button */}
+                {/* FEATURE 13 & 14 LINK: Personalization Button */}
+                <button
+                  onClick={() => {
+                    // This packs the car's specific info into the link
+                    const params = new URLSearchParams({
+                      model: car.model,
+                      img: car.img,
+                      price: car.price
+                    }).toString();
+                    window.location.href = `/personalize?${params}`;
+                  }}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: '10px', border: '2px solid #2563eb',
+                    cursor: 'pointer', background: 'white', color: '#2563eb', fontWeight: 'bold', marginBottom: '10px'
+                  }}
+                >
+                  🛠️ Build & Personalize
+                </button>
+
                 {/* WATCH / REVIEW / WISHLIST LOGIC */}
                 <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginTop: '10px' }}>
                   {activeCarId !== car.id ? (
@@ -113,8 +132,8 @@ const Discovery = () => {
                         padding: '12px',
                         borderRadius: '10px',
                         border: 'none',
-                        background: '#2563eb', // The exact blue you used for Compare
-                        color: 'white',
+                        background: '#f1f5f9',
+                        color: '#475569',
                         fontWeight: 'bold',
                         cursor: 'pointer'
                       }}
@@ -134,7 +153,6 @@ const Discovery = () => {
                       >
                         Close Forms
                       </button>
-                  
                     </div>
                   )}
                 </div>
@@ -152,21 +170,21 @@ const Discovery = () => {
                 <thead>
                   <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
                     <th style={{ padding: '15px' }}>Metrics</th>
-                    {selectedCars.map(car => <th key={car.id}>{car.model}</th>)}
+                    {selectedCars.map(car => <th key={car.id} style={{ padding: '15px' }}>{car.model}</th>)}
                   </tr>
                 </thead>
                 <tbody>
                   <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '15px', fontWeight: 'bold' }}>Market Price</td>
-                    {selectedCars.map(car => <td key={car.id}>${car.price.toLocaleString()}</td>)}
+                    {selectedCars.map(car => <td key={car.id} style={{ padding: '15px' }}>${car.price.toLocaleString()}</td>)}
                   </tr>
                   <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '15px', fontWeight: 'bold' }}>Max Speed</td>
-                    {selectedCars.map(car => <td key={car.id}>{car.speed}</td>)}
+                    {selectedCars.map(car => <td key={car.id} style={{ padding: '15px' }}>{car.speed}</td>)}
                   </tr>
                   <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '15px', fontWeight: 'bold' }}>Range/Tank</td>
-                    {selectedCars.map(car => <td key={car.id}>{car.range}</td>)}
+                    {selectedCars.map(car => <td key={car.id} style={{ padding: '15px' }}>{car.range}</td>)}
                   </tr>
                 </tbody>
               </table>
