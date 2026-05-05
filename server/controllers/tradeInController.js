@@ -13,16 +13,22 @@ function calculateTradeIn(year, mileage, condition) {
   const currentYear = new Date().getFullYear();
   const age = currentYear - year;
 
+  // Age deduction: 8% per year, capped at 70%
   const ageDeductionRate = Math.min(age * 0.08, 0.70);
   const baseValue = BASE_VALUE;
   const ageDeduction = Math.round(baseValue * ageDeductionRate);
 
+  // Mileage deduction: 0.5 per km over 15k/year average
   const expectedKm = age * 15000;
   const excessKm = Math.max(0, mileage - expectedKm);
   const mileageDeduction = Math.round(excessKm * 0.5);
 
   const valueAfterDeductions = Math.max(0, baseValue - ageDeduction - mileageDeduction);
-  const conditionMultiplier = CONDITION_MULTIPLIERS[condition];
+  
+  // FIX: Force lowercase to match the CONDITION_MULTIPLIERS keys
+  const sanitizedCondition = condition ? condition.toLowerCase() : 'good';
+  const conditionMultiplier = CONDITION_MULTIPLIERS[sanitizedCondition] || 0.85; 
+  
   const estimatedValue = Math.round(valueAfterDeductions * conditionMultiplier);
 
   return {
@@ -53,7 +59,7 @@ exports.calculateValuation = async (req, res) => {
       year,
       mileage,
       condition,
-      ...result,
+      ...result, // This spreads estimatedValue and breakdown into the response
     });
   } catch (err) {
     return res.status(500).json({ message: "Server error.", error: err.message });
@@ -63,7 +69,7 @@ exports.calculateValuation = async (req, res) => {
 exports.submitTradeIn = async (req, res) => {
   try {
     const { make, model, year, mileage, condition } = req.body;
-    const customerId = req.user.id;
+    const customerId = req.user.id; // Requires 'protect' middleware in routes
 
     const { estimatedValue, breakdown } = calculateTradeIn(year, mileage, condition);
 

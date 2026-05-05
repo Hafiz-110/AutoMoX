@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
+const tradeInRoutes = require('./routes/tradeInRoutes');
 require('dotenv').config();
 
 const userInteractionRoutes = require('./routes/userInteractionRoutes');
@@ -13,6 +14,7 @@ const URI = process.env.MONGO_URI;
 app.use(cors());
 app.use(express.json());
 app.use('/api/auth', authRoutes);
+app.use('/api/trade-in', tradeInRoutes);
 
 // 1. DEFINE THE MODEL LOCALLY (To avoid import errors)
 const Wishlist = mongoose.models.Wishlist || mongoose.model('Wishlist', new mongoose.Schema({
