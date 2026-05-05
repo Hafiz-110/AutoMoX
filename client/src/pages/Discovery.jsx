@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const localCars = [
   { id: 1, make: "Tesla", model: "Model 3", price: 45000, fuel: "Electric", year: 2024, range: "350 miles", speed: "145 mph", img: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400" },
@@ -13,6 +14,7 @@ const localCars = [
 ]
 
 const Discovery = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [priceRange, setPriceRange] = useState(100000); // Default to max
   const [selectedCars, setSelectedCars] = useState([]);
@@ -31,12 +33,20 @@ const Discovery = () => {
   };
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
+    <div style={{ background: '#090909', minHeight: '100vh', padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
       <div style={{ maxWidth: '1200px', margin: 'auto' }}>
         
         {/* Header and Controls */}
-        <div style={{ background: '#fff', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
-          <h1 style={{ marginBottom: '20px' }}>AutoMoX | Discovery Dashboard</h1>
+        <div style={{ background: '#0e0e0e', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+  <h1 style={{ margin: 0 }}>AutoMoX | Discovery Dashboard</h1>
+  <button
+    onClick={() => navigate('/loan-calculator')}
+    style={{ background: '#2563eb', color: '#fff', border: 'none', borderRadius: '8px', padding: '10px 20px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+  >
+    💰 Loan Calculator
+  </button>
+</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'center' }}>
             <input 
               placeholder="Search by Make..." 
@@ -59,14 +69,14 @@ const Discovery = () => {
         {/* Grid Container */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
           {filteredCars.map(car => (
-            <div key={car.id} style={{ background: '#fff', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+            <div key={car.id} style={{ background: '#111010', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
               <img src={car.img} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt={car.model} />
               <div style={{ padding: '20px' }}>
                 <h3 style={{ margin: '0' }}>{car.make} {car.model}</h3>
                 <p style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '1.2rem', margin: '10px 0' }}>${car.price.toLocaleString()}</p>
                 
                 {/* Stats Section */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', background: '#f8fafc', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', background: '#323334', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
                    <div>📅 {car.year}</div>
                    <div>⛽ {car.fuel}</div>
                    <div>🏎️ {car.speed}</div>
@@ -74,14 +84,16 @@ const Discovery = () => {
                 </div>
 
                 <button 
-                  onClick={() => toggleCompare(car)}
-                  style={{ 
-                    width: '100%', padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                    background: selectedCars.find(c => c.id === car.id) ? '#ef4444' : '#2563eb', color: 'white', fontWeight: 'bold'
-                  }}
-                >
-                  {selectedCars.find(c => c.id === car.id) ? 'Remove Compare' : 'Add to Compare'}
-                </button>
+  onClick={() => toggleCompare(car)}
+  style={{ 
+    width: '100%', padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+    background: selectedCars.find(c => c.id === car.id) ? '#ef4444' : '#2563eb', color: 'white', fontWeight: 'bold'
+  }}
+>
+  {selectedCars.find(c => c.id === car.id) ? 'Remove Compare' : 'Add to Compare'}
+</button>
+
+
               </div>
             </div>
           ))}
@@ -89,18 +101,18 @@ const Discovery = () => {
 
         {/* Comparison Modal (Feature 2) */}
         {selectedCars.length > 0 && (
-          <div style={{ marginTop: '50px', background: '#fff', padding: '30px', borderRadius: '20px', border: '2px solid #2563eb' }}>
+          <div style={{ marginTop: '50px', background: '#f67307', padding: '30px', borderRadius: '20px', border: '2px solid #2563eb' }}>
             <h2 style={{ color: '#1e293b' }}>Technical Comparison</h2>
             <div style={{ overflowX: 'auto' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc', textAlign: 'left' }}>
+                  <tr style={{ background: '#fe6105', textAlign: 'left' }}>
                     <th style={{ padding: '15px' }}>Metrics</th>
                     {selectedCars.map(car => <th key={car.id}>{car.model}</th>)}
                   </tr>
                 </thead>
                 <tbody>
-                  <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <tr style={{ borderBottom: '1px solid #0c7ae9' }}>
                     <td style={{ padding: '15px', fontWeight: 'bold' }}>Market Price</td>
                     {selectedCars.map(car => <td key={car.id}>${car.price.toLocaleString()}</td>)}
                   </tr>
