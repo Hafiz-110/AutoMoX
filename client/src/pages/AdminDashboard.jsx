@@ -287,7 +287,6 @@ const AdminDashboard = () => {
 
       {/* Content */}
       <div style={{ maxWidth: 1400, margin: '0 auto', padding: '32px' }}>
-        {activeTab === 'analytics' && <AnalyticsDashboard />}
         {activeTab === 'inventory' && <InventoryManager />}
       </div>
     </div>
