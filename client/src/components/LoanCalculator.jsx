@@ -1,13 +1,16 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import jsPDF from 'jspdf';
 
 const LOAN_TERMS = [12, 24, 36, 48, 60, 72];
 
 export default function LoanCalculator() {
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [carPrice, setCarPrice]         = useState("");
+  const prefilled = location.state || {};
+
+  const [carPrice, setCarPrice]         = useState(prefilled.carPrice ? String(prefilled.carPrice) : "");
   const [downPayment, setDownPayment]   = useState("");
   const [interestRate, setInterestRate] = useState("");
   const [loanTerm, setLoanTerm]         = useState(60);
@@ -18,24 +21,20 @@ export default function LoanCalculator() {
     setError("");
     setResult(null);
 
-    const price   = parseFloat(carPrice);
-    const down    = parseFloat(downPayment);
-    const rate    = parseFloat(interestRate);
-    const months  = parseInt(loanTerm);
+    const price  = parseFloat(carPrice);
+    const down   = parseFloat(downPayment);
+    const rate   = parseFloat(interestRate);
+    const months = parseInt(loanTerm);
 
-    // Validation
-    if (!price || price <= 0)       return setError("Please enter a valid car price.");
-    if (isNaN(down) || down < 0)    return setError("Please enter a valid down payment.");
-    if (down >= price)              return setError("Down payment cannot be more than car price.");
-    if (!rate || rate <= 0)         return setError("Please enter a valid interest rate.");
+    if (!price || price <= 0)    return setError("Please enter a valid car price.");
+    if (isNaN(down) || down < 0) return setError("Please enter a valid down payment.");
+    if (down >= price)           return setError("Down payment cannot be more than car price.");
+    if (!rate || rate <= 0)      return setError("Please enter a valid interest rate.");
 
     const principal   = price - down;
     const monthlyRate = rate / 12 / 100;
-
-    // Monthly payment formula
-    const monthly = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
-                    (Math.pow(1 + monthlyRate, months) - 1);
-
+    const monthly     = (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
+                        (Math.pow(1 + monthlyRate, months) - 1);
     const totalPayment  = monthly * months;
     const totalInterest = totalPayment - principal;
 
@@ -51,7 +50,7 @@ export default function LoanCalculator() {
   };
 
   const reset = () => {
-    setCarPrice("");
+    setCarPrice(prefilled.carPrice ? String(prefilled.carPrice) : "");
     setDownPayment("");
     setInterestRate("");
     setLoanTerm(60);
@@ -60,54 +59,56 @@ export default function LoanCalculator() {
   };
 
   const downloadPDF = () => {
-  const doc = new jsPDF();
+    const doc = new jsPDF();
 
-  // Title
-  doc.setFontSize(22);
-  doc.setFont('helvetica', 'bold');
-  doc.text('AutoMoX - Car Financing Summary', 20, 20);
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('AutoMoX - Car Financing Summary', 20, 20);
 
-  // Divider line
-  doc.setLineWidth(0.5);
-  doc.line(20, 26, 190, 26);
+    doc.setLineWidth(0.5);
+    doc.line(20, 26, 190, 26);
 
-  // Car Details Section
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Car Specifications', 20, 40);
+    if (prefilled.carName) {
+      doc.setFontSize(13);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(80);
+      doc.text(`Vehicle: ${prefilled.carName}`, 20, 34);
+      doc.setTextColor(0);
+    }
 
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Car Price:        $${Number(carPrice).toLocaleString()}`, 20, 52);
-  doc.text(`Down Payment:     $${Number(downPayment).toLocaleString()} (${downPercent}%)`, 20, 62);
-  doc.text(`Loan Amount:      $${Number(result.principal).toLocaleString()}`, 20, 72);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Car Specifications', 20, 46);
 
-  // Financing Section
-  doc.setFontSize(14);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Financing Plan', 20, 90);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Car Price:        $${Number(carPrice).toLocaleString()}`, 20, 58);
+    doc.text(`Down Payment:     $${Number(downPayment).toLocaleString()}${downPercent ? ` (${downPercent}%)` : ''}`, 20, 68);
+    doc.text(`Loan Amount:      $${Number(result.principal).toLocaleString()}`, 20, 78);
 
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Annual Interest Rate:  ${result.rate}%`, 20, 102);
-  doc.text(`Loan Term:             ${result.months} months (${result.months / 12} years)`, 20, 112);
-  doc.text(`Monthly Installment:   $${Number(result.monthly).toLocaleString()}`, 20, 122);
-  doc.text(`Total Payment:         $${Number(result.totalPayment).toLocaleString()}`, 20, 132);
-  doc.text(`Total Interest Paid:   $${Number(result.totalInterest).toLocaleString()}`, 20, 142);
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Financing Plan', 20, 96);
 
-  // Divider
-  doc.line(20, 152, 190, 152);
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Annual Interest Rate:  ${result.rate}%`, 20, 108);
+    doc.text(`Loan Term:             ${result.months} months (${result.months / 12} years)`, 20, 118);
+    doc.text(`Monthly Installment:   $${Number(result.monthly).toLocaleString()}`, 20, 128);
+    doc.text(`Total Payment:         $${Number(result.totalPayment).toLocaleString()}`, 20, 138);
+    doc.text(`Total Interest Paid:   $${Number(result.totalInterest).toLocaleString()}`, 20, 148);
 
-  // Footer note
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'italic');
-  doc.setTextColor(120);
-  doc.text('* This is an estimate only. Actual rates may vary based on credit score and lender terms.', 20, 162);
-  doc.text(`Generated by AutoMoX on ${new Date().toLocaleDateString()}`, 20, 170);
+    doc.line(20, 158, 190, 158);
 
-  // Save
-  doc.save('AutoMoX-Financing-Summary.pdf');
-};
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(120);
+    doc.text('* This is an estimate only. Actual rates may vary based on credit score and lender terms.', 20, 168);
+    doc.text(`Generated by AutoMoX on ${new Date().toLocaleDateString()}`, 20, 176);
+
+    doc.save('AutoMoX-Financing-Summary.pdf');
+  };
+
   const downPercent = carPrice && downPayment
     ? ((parseFloat(downPayment) / parseFloat(carPrice)) * 100).toFixed(1)
     : null;
@@ -115,86 +116,68 @@ export default function LoanCalculator() {
   return (
     <div style={{ fontFamily: "'Segoe UI', sans-serif", maxWidth: "750px", margin: "0 auto", padding: "32px 16px" }}>
 
-      {/* Header */}
       <button onClick={() => navigate("/")} style={backBtnStyle}>← Back to Cars</button>
 
       <div style={{ marginTop: "24px", marginBottom: "32px" }}>
         <h1 style={{ fontSize: "28px", fontWeight: "800", color: "#111827", margin: "0 0 6px" }}>
           💰 Loan Calculator
         </h1>
-        <p style={{ margin: 0, color: "#6B7280", fontSize: "15px" }}>
-          Estimate your monthly car loan installments
-        </p>
+        {prefilled.carName ? (
+          <p style={{ margin: 0, color: "#2563eb", fontSize: "15px", fontWeight: "600" }}>
+            Calculating for: {prefilled.carName} — ${Number(prefilled.carPrice).toLocaleString()}
+          </p>
+        ) : (
+          <p style={{ margin: 0, color: "#6B7280", fontSize: "15px" }}>
+            Estimate your monthly car loan installments
+          </p>
+        )}
       </div>
 
       {/* Calculator Card */}
       <div style={{ background: "#fff", border: "1px solid #E5E7EB", borderRadius: "16px", padding: "32px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)", marginBottom: "24px" }}>
 
-        {/* Car Price */}
         <div style={{ marginBottom: "20px" }}>
           <label style={labelStyle}>Car Price ($)</label>
           <input
-            type="number"
-            value={carPrice}
+            type="number" value={carPrice}
             onChange={(e) => setCarPrice(e.target.value)}
-            placeholder="e.g. 35000"
-            style={inputStyle}
-            min="0"
+            placeholder="e.g. 35000" style={inputStyle} min="0"
           />
         </div>
 
-        {/* Down Payment */}
         <div style={{ marginBottom: "6px" }}>
           <label style={labelStyle}>Down Payment ($)</label>
           <input
-            type="number"
-            value={downPayment}
+            type="number" value={downPayment}
             onChange={(e) => setDownPayment(e.target.value)}
-            placeholder="e.g. 7000"
-            style={inputStyle}
-            min="0"
+            placeholder="e.g. 7000" style={inputStyle} min="0"
           />
         </div>
-        {downPercent && (
-          <p style={{ margin: "0 0 20px", fontSize: "12px", color: "#6B7280" }}>
-            = <strong>{downPercent}%</strong> of car price
-          </p>
-        )}
-        {!downPercent && <div style={{ marginBottom: "20px" }} />}
+        {downPercent
+          ? <p style={{ margin: "0 0 20px", fontSize: "12px", color: "#6B7280" }}>= <strong>{downPercent}%</strong> of car price</p>
+          : <div style={{ marginBottom: "20px" }} />
+        }
 
-        {/* Interest Rate */}
         <div style={{ marginBottom: "20px" }}>
           <label style={labelStyle}>Annual Interest Rate (%)</label>
           <input
-            type="number"
-            value={interestRate}
+            type="number" value={interestRate}
             onChange={(e) => setInterestRate(e.target.value)}
-            placeholder="e.g. 5.5"
-            style={inputStyle}
-            min="0"
-            step="0.1"
+            placeholder="e.g. 5.5" style={inputStyle} min="0" step="0.1"
           />
         </div>
 
-        {/* Loan Term */}
         <div style={{ marginBottom: "28px" }}>
           <label style={labelStyle}>Loan Term</label>
           <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
             {LOAN_TERMS.map((t) => (
-              <button
-                key={t}
-                onClick={() => setLoanTerm(t)}
-                style={{
-                  padding: "10px 18px",
-                  borderRadius: "8px",
-                  border: loanTerm === t ? "2px solid #111827" : "1px solid #D1D5DB",
-                  background: loanTerm === t ? "#111827" : "#fff",
-                  color: loanTerm === t ? "#fff" : "#374151",
-                  fontWeight: "600",
-                  fontSize: "13px",
-                  cursor: "pointer",
-                }}
-              >
+              <button key={t} onClick={() => setLoanTerm(t)} style={{
+                padding: "10px 18px", borderRadius: "8px",
+                border: loanTerm === t ? "2px solid #111827" : "1px solid #D1D5DB",
+                background: loanTerm === t ? "#111827" : "#fff",
+                color: loanTerm === t ? "#fff" : "#374151",
+                fontWeight: "600", fontSize: "13px", cursor: "pointer",
+              }}>
                 {t}mo
               </button>
             ))}
@@ -204,25 +187,17 @@ export default function LoanCalculator() {
           </p>
         </div>
 
-        {/* Error */}
         {error && (
           <div style={{ background: "#FEF2F2", border: "1px solid #FECACA", borderRadius: "8px", padding: "12px 16px", marginBottom: "16px" }}>
             <p style={{ margin: 0, color: "#DC2626", fontSize: "13px" }}>⚠️ {error}</p>
           </div>
         )}
 
-        {/* Buttons */}
         <div style={{ display: "flex", gap: "12px" }}>
-          <button
-            onClick={calculate}
-            style={{ flex: 1, background: "#111827", color: "#fff", border: "none", borderRadius: "10px", padding: "14px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}
-          >
+          <button onClick={calculate} style={{ flex: 1, background: "#111827", color: "#fff", border: "none", borderRadius: "10px", padding: "14px", fontSize: "15px", fontWeight: "700", cursor: "pointer" }}>
             Calculate
           </button>
-          <button
-            onClick={reset}
-            style={{ background: "#fff", color: "#374151", border: "1px solid #D1D5DB", borderRadius: "10px", padding: "14px 24px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}
-          >
+          <button onClick={reset} style={{ background: "#fff", color: "#374151", border: "1px solid #D1D5DB", borderRadius: "10px", padding: "14px 24px", fontSize: "15px", fontWeight: "600", cursor: "pointer" }}>
             Reset
           </button>
         </div>
@@ -231,32 +206,15 @@ export default function LoanCalculator() {
       {/* Result */}
       {result && (
         <div style={{ background: "#F0FDF4", border: "1px solid #BBF7D0", borderRadius: "16px", padding: "32px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+            <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "#065F46" }}>✅ Your Loan Estimate</h2>
+            <button onClick={downloadPDF} style={{ background: "#16A34A", color: "#fff", border: "none", borderRadius: "10px", padding: "10px 20px", fontSize: "14px", fontWeight: "700", cursor: "pointer" }}>
+              📄 Download PDF
+            </button>
+          </div>
 
-         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-  <h2 style={{ margin: 0, fontSize: "18px", fontWeight: "700", color: "#065F46" }}>
-    ✅ Your Loan Estimate
-  </h2>
-  <button
-    onClick={downloadPDF}
-    style={{
-      background: "#16A34A",
-      color: "#fff",
-      border: "none",
-      borderRadius: "10px",
-      padding: "10px 20px",
-      fontSize: "14px",
-      fontWeight: "700",
-      cursor: "pointer",
-    }}
-  >
-    📄 Download PDF
-  </button>
-</div>
-          {/* Monthly Payment — Big */}
           <div style={{ textAlign: "center", background: "#fff", borderRadius: "12px", padding: "24px", marginBottom: "20px", border: "2px solid #16A34A" }}>
-            <p style={{ margin: "0 0 8px", fontSize: "13px", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.5px" }}>
-              Monthly Installment
-            </p>
+            <p style={{ margin: "0 0 8px", fontSize: "13px", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.5px" }}>Monthly Installment</p>
             <p style={{ margin: 0, fontSize: "48px", fontWeight: "800", color: "#16A34A" }}>
               ${Number(result.monthly).toLocaleString()}
             </p>
@@ -265,7 +223,6 @@ export default function LoanCalculator() {
             </p>
           </div>
 
-          {/* Breakdown */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             {[
               { label: "Car Price",      value: `$${Number(parseFloat(result.principal) + parseFloat(result.downPayment)).toLocaleString()}` },
@@ -274,19 +231,11 @@ export default function LoanCalculator() {
               { label: "Total Interest", value: `$${Number(result.totalInterest).toLocaleString()}` },
               { label: "Total Payment",  value: `$${Number(result.totalPayment).toLocaleString()}`, full: true },
             ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  background: "#fff",
-                  borderRadius: "10px",
-                  padding: "16px",
-                  border: "1px solid #E5E7EB",
-                  gridColumn: item.full ? "1 / -1" : "auto",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
+              <div key={item.label} style={{
+                background: "#fff", borderRadius: "10px", padding: "16px",
+                border: "1px solid #E5E7EB", gridColumn: item.full ? "1 / -1" : "auto",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+              }}>
                 <span style={{ fontSize: "13px", color: "#6B7280" }}>{item.label}</span>
                 <span style={{ fontSize: "16px", fontWeight: "700", color: "#111827" }}>{item.value}</span>
               </div>

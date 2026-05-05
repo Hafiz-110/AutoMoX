@@ -24,26 +24,6 @@ const Discovery = () => {
   const [activeCarId, setActiveCarId] = useState(null);
   const [fuelFilter, setFuelFilter] = useState('All');
 
-  // NEW: Feature 10 Authentication State
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
-
-  const handleAuth = () => {
-    if (isLoggedIn) {
-      localStorage.removeItem('isLoggedIn');
-      setIsLoggedIn(false);
-      alert("Logged out successfully.");
-    } else {
-      const pass = prompt("Enter User Password (Hint: 1234):");
-      if (pass === "1234") {
-        localStorage.setItem('isLoggedIn', 'true');
-        setIsLoggedIn(true);
-        alert("Welcome back, Junayed!");
-      } else {
-        alert("Invalid password!");
-      }
-    }
-  };
-
   const filteredCars = localCars.filter(car =>
     car.make.toLowerCase().includes(searchTerm.toLowerCase()) &&
     car.price <= priceRange &&
@@ -73,9 +53,11 @@ const Discovery = () => {
     }
   };
 
+  // DATABASE-BACKED TEST DRIVE (Feature 9)
   const handleBookTestDrive = async (car) => {
     const date = prompt("Enter a preferred date for your Test Drive (YYYY-MM-DD):");
     if (!date) return;
+
     try {
       await axios.post('http://localhost:5000/api/wishlist', {
         userId: "User1",
@@ -87,6 +69,7 @@ const Discovery = () => {
       alert(`Success! Test drive for ${car.make} ${car.model} on ${date} saved to database. ✅`);
     } catch (err) {
       console.error("Database Error:", err);
+      alert("Failed to save booking to database.");
     }
   };
 
@@ -106,24 +89,13 @@ const Discovery = () => {
         <div style={{ background: '#fff', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h1 style={{ margin: 0, color: '#111' }}>AutoMoX | Discovery Dashboard</h1>
-            
-            {/* UPDATED: Feature 10 Header Actions */}
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                onClick={handleAuth}
-                style={{ background: isLoggedIn ? '#ef4444' : '#10b981', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                {isLoggedIn ? '🔓 Logout' : '🔒 Login'}
-              </button>
-              <button
-                onClick={() => navigate('/admin')}
-                style={{ background: '#1e293b', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                🛡️ Dealer Admin Portal
-              </button>
-            </div>
+            <button
+              onClick={() => navigate('/admin')}
+              style={{ background: '#1e293b', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              🛡️ Dealer Admin Portal
+            </button>
           </div>
-
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '30px', alignItems: 'center' }}>
             <input
               placeholder="Search by Make..."
@@ -210,6 +182,18 @@ const Discovery = () => {
                   🛠️ Build & Personalize
                 </button>
 
+                <button
+                  onClick={() => navigate('/loan-calculator', {
+                    state: { carPrice: car.price, carName: `${car.make} ${car.model}` }
+                  })}
+                  style={{
+                    width: '100%', padding: '10px', borderRadius: '10px', border: '1px solid #e8c96a',
+                    cursor: 'pointer', background: '#fff', color: '#92660a', fontSize: '0.9rem', marginBottom: '10px', fontWeight: 'bold'
+                  }}
+                >
+                  💰 Loan Calculator
+                </button>
+
                 <div style={{ borderTop: '1px solid #333', paddingTop: '10px', marginTop: '10px' }}>
                   {activeCarId !== car.id ? (
                     <button
@@ -237,6 +221,7 @@ const Discovery = () => {
                     </div>
                   )}
                 </div>
+
               </div>
             </div>
           ))}
@@ -288,35 +273,39 @@ const Discovery = () => {
           </div>
         )}
 
-        {/* FEATURE 8: Floating Inquiry / Chat Bubble */}
-        <div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 1000 }}>
-          <button 
-            onClick={() => {
-              const msg = prompt("How can we help you today? (e.g., 'Is the Tesla available?')");
-              if(msg) {
-                axios.post('http://localhost:5000/api/wishlist', {
-                  userId: "User1",
-                  email: "junayedazuz530@gmail.com",
-                  type: 'inquiry',
-                  note: msg
-                });
-                alert("Your message has been sent to the dealer! 📩");
-              }
-            }}
-            style={{ 
-              width: '65px', height: '65px', borderRadius: '50%', background: '#2563eb', 
-              color: 'white', border: 'none', cursor: 'pointer', fontSize: '28px', 
-              boxShadow: '0 8px 24px rgba(37, 99, 235, 0.5)', display: 'flex', 
-              alignItems: 'center', justifyContent: 'center'
-            }}
-          >
-            💬
-          </button>
-        </div>
-
       </div>
     </div>
   );
 };
+
+{/* FEATURE 8: Floating Inquiry / Chat Bubble */}
+<div style={{ position: 'fixed', bottom: '30px', right: '30px', zIndex: 1000 }}>
+  <button 
+    onClick={() => {
+      const msg = prompt("How can we help you today? (e.g., 'Is the Tesla available for a trade-in?')");
+      if(msg) {
+        // This sends the inquiry directly to your wishlists collection
+        axios.post('http://localhost:5000/api/wishlist', {
+          userId: "User1",
+          email: "junayedazuz530@gmail.com",
+          type: 'inquiry',
+          note: msg
+        });
+        alert("Your message has been sent to the dealer! 📩");
+      }
+    }}
+    style={{ 
+      width: '65px', height: '65px', borderRadius: '50%', background: '#2563eb', 
+      color: 'white', border: 'none', cursor: 'pointer', fontSize: '28px', 
+      boxShadow: '0 8px 24px rgba(37, 99, 235, 0.5)', display: 'flex', 
+      alignItems: 'center', justifyContent: 'center', transition: 'transform 0.2s'
+    }}
+    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1.0)'}
+  >
+    💬
+  </button>
+</div>
+
 
 export default Discovery;
