@@ -22,16 +22,34 @@ const Discovery = () => {
   const [priceRange, setPriceRange] = useState(230000);
   const [selectedCars, setSelectedCars] = useState([]);
   const [activeCarId, setActiveCarId] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem('isLoggedIn') === 'true');
+
+  const handleAuth = () => {
+    if (isLoggedIn) {
+      localStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+      alert("Logged out successfully.");
+    } else {
+      const pass = prompt("Enter User Password (Hint: 1234):");
+      if (pass === "1234") {
+        localStorage.setItem('isLoggedIn', 'true');
+        setIsLoggedIn(true);
+        alert("Welcome back, Junayed!");
+      } else {
+        alert("Invalid password!");
+      }
+    }
+  };
 
   const filteredCars = localCars.filter(car =>
     car.make.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    car.price <= priceRange
+    car.price <= priceRange &&
+    (fuelFilter === 'All' || car.fuel === fuelFilter)
   );
 
   const handleViewTracking = async (carId) => {
     try {
       await axios.patch(`http://localhost:5000/api/cars/${carId}/view`);
-      console.log("View tracked for:", carId);
     } catch (err) {
       console.error("Tracking failed:", err);
     }
@@ -39,13 +57,30 @@ const Discovery = () => {
 
   const handleWatch = async (car) => {
     try {
-      await axios.post('http://localhost:5000/api/add-wishlist', {
-        type: 'watch',
+      await axios.post('http://localhost:5000/api/wishlist', {
+        userId: "User1",
         carId: car.id.toString(),
-        userId: "User1"
+        email: "junayedazuz530@gmail.com",
+        type: 'watch'
       });
       setActiveCarId(car.id);
-      alert(`${car.make} ${car.model} is now being tracked.`);
+      alert(`${car.make} ${car.model} is now being tracked!`);
+    } catch (err) {
+      console.error("Connection Error:", err.response || err);
+    }
+  };
+
+  const handleBookTestDrive = async (car) => {
+    const date = prompt("Enter a preferred date for your Test Drive (YYYY-MM-DD):");
+    if (!date) return;
+    try {
+      await axios.post('http://localhost:5000/api/wishlist', {
+        userId: "User1",
+        carId: car.id.toString(),
+        email: "junayedazuz530@gmail.com",
+        type: 'test-drive',
+        note: `Requested Date: ${date}`
+      });
     } catch (err) {
       alert("Error saving to database.");
     }
