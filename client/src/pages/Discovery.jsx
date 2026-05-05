@@ -60,7 +60,7 @@ const Discovery = () => {
   };
 
   return (
-    <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
+    <div style={{ background: '#090909', minHeight: '100vh', padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
       <div style={{ maxWidth: '1200px', margin: 'auto' }}>
 
         {/* Header & Filters */}
@@ -97,15 +97,15 @@ const Discovery = () => {
         {/* Car Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
           {filteredCars.map(car => (
-            <div key={car.id} style={{ background: '#fff', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
+            <div key={car.id} style={{ background: '#111010', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
               <img src={car.img} style={{ width: '100%', height: '180px', objectFit: 'cover' }} alt={car.model} />
               <div style={{ padding: '20px' }}>
-                <h3 style={{ margin: '0' }}>{car.make} {car.model}</h3>
+                <h3 style={{ margin: '0', color: '#fff' }}>{car.make} {car.model}</h3>
                 <p style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '1.2rem', margin: '10px 0' }}>
                   ${car.price.toLocaleString()}
                 </p>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', background: '#f8fafc', padding: '10px', borderRadius: '8px', marginBottom: '15px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '0.85rem', background: '#323334', padding: '10px', borderRadius: '8px', marginBottom: '15px', color: '#fff' }}>
                   <div>📅 {car.year}</div>
                   <div>⛽ {car.fuel}</div>
                   <div>🏎️ {car.speed}</div>
@@ -155,7 +155,7 @@ const Discovery = () => {
                 </button>
 
                 {/* Feature 4: Watch / Wishlist */}
-                <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginTop: '10px' }}>
+                <div style={{ borderTop: '1px solid #333', paddingTop: '10px', marginTop: '10px' }}>
                   {activeCarId !== car.id ? (
                     <button
                       onClick={() => handleWatch(car)}

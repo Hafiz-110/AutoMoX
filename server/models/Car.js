@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const carSchema = new mongoose.Schema({
+<<<<<<< HEAD
     make: { type: String, required: true },
     model: { type: String, required: true },
     fuelType: { type: String, required: true },
@@ -18,5 +19,17 @@ const carSchema = new mongoose.Schema({
     color: { type: String },
     msrp: { type: Number },
 });
+=======
+  make:      { type: String, required: true },
+  model:     { type: String, required: true },
+  fuelType:  { type: String, required: true },
+  price:     { type: Number, required: true },
+  year:      { type: Number },
+  images:    [{ type: String }],  // ← array of image URLs
+  stock:     { type: Number, default: 1 },
+  speed:     { type: String },
+  range:     { type: String },
+}, { timestamps: true });
+>>>>>>> 29776070a04a7776c1a795a9174e41c027bd0c40
 
 module.exports = mongoose.model('Car', carSchema);
