@@ -14,7 +14,7 @@ const localCars = [
   { id: 9, make: "Mercedes", model: "C-Class", price: 46000, fuel: "Petrol", year: 2023, range: "420 miles", speed: "132 mph", img: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400" },
   { id: 10, make: "Honda", model: "Civic", price: 25000, fuel: "Petrol", year: 2023, range: "410 miles", speed: "125 mph", img: "https://images.unsplash.com/photo-1599912027806-cfec9f5944b6?w=400" },
   { id: 12, make: "Lamborghini", model: "Urus", price: 230000, fuel: "Petrol", year: 2024, range: "370 miles", speed: "190 mph", img: "https://placehold.co/400x225/facc15/000?text=Urus" },
-]
+];
 
 const Discovery = () => {
   const navigate = useNavigate();
@@ -28,10 +28,8 @@ const Discovery = () => {
     car.price <= priceRange
   );
 
-  // --- NEW: LOGIC TO TRACK VIEWS (Feature 18) ---
   const handleViewTracking = async (carId) => {
     try {
-      // Replace with your actual car ID if it differs in MongoDB
       await axios.patch(`http://localhost:5000/api/cars/${carId}/view`);
       console.log("View tracked for:", carId);
     } catch (err) {
@@ -65,10 +63,11 @@ const Discovery = () => {
     <div style={{ background: '#f8fafc', minHeight: '100vh', padding: '40px', fontFamily: 'Segoe UI, sans-serif' }}>
       <div style={{ maxWidth: '1200px', margin: 'auto' }}>
 
+        {/* Header & Filters */}
         <div style={{ background: '#fff', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', marginBottom: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h1 style={{ margin: 0 }}>AutoMoX | Discovery Dashboard</h1>
-            <button 
+            <button
               onClick={() => navigate('/admin')}
               style={{ background: '#1e293b', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
             >
@@ -95,6 +94,7 @@ const Discovery = () => {
           </div>
         </div>
 
+        {/* Car Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '25px' }}>
           {filteredCars.map(car => (
             <div key={car.id} style={{ background: '#fff', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 4px 6px rgba(0,0,0,0.05)', border: '1px solid #f1f5f9' }}>
@@ -112,20 +112,22 @@ const Discovery = () => {
                   <div>🔋 {car.range}</div>
                 </div>
 
+                {/* Feature 2: Compare Button */}
                 <button
                   onClick={() => toggleCompare(car)}
                   style={{
                     width: '100%', padding: '12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
-                    background: selectedCars.find(c => c.id === car.id) ? '#ef4444' : '#2563eb', color: 'white', fontWeight: 'bold', marginBottom: '10px'
+                    background: selectedCars.find(c => c.id === car.id) ? '#ef4444' : '#2563eb',
+                    color: 'white', fontWeight: 'bold', marginBottom: '10px'
                   }}
                 >
                   {selectedCars.find(c => c.id === car.id) ? 'Remove Compare' : 'Add to Compare'}
                 </button>
 
-                {/* MODIFIED: Trigger tracking when user goes to personalize */}
+                {/* Feature 13: Build & Personalize */}
                 <button
                   onClick={() => {
-                    handleViewTracking(car.id); // TRACK VIEW HERE
+                    handleViewTracking(car.id);
                     const params = new URLSearchParams({
                       model: car.model,
                       img: car.img,
@@ -141,6 +143,7 @@ const Discovery = () => {
                   🛠️ Build & Personalize
                 </button>
 
+                {/* Feature 6: Trade-In */}
                 <button
                   onClick={() => navigate('/trade-in')}
                   style={{
@@ -151,6 +154,7 @@ const Discovery = () => {
                   🚗 Trade-In Valuation
                 </button>
 
+                {/* Feature 4: Watch / Wishlist */}
                 <div style={{ borderTop: '1px solid #eee', paddingTop: '10px', marginTop: '10px' }}>
                   {activeCarId !== car.id ? (
                     <button
@@ -182,7 +186,53 @@ const Discovery = () => {
             </div>
           ))}
         </div>
-        {/* ... Rest of Comparison Modal remains same ... */}
+
+        {/* Feature 2: Comparison Table */}
+        {selectedCars.length >= 2 && (
+          <div style={{ marginTop: '40px', background: '#fff', borderRadius: '20px', padding: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' }}>
+            <h2 style={{ marginBottom: '20px' }}>🔍 Car Comparison</h2>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc' }}>
+                    <th style={{ padding: '15px', textAlign: 'left', borderBottom: '2px solid #e2e8f0' }}>Feature</th>
+                    {selectedCars.map(car => (
+                      <th key={car.id} style={{ padding: '15px', borderBottom: '2px solid #e2e8f0' }}>
+                        <img src={car.img} alt={car.model} style={{ width: '80px', height: '50px', objectFit: 'cover', borderRadius: '8px', display: 'block', margin: '0 auto 8px' }} />
+                        {car.make} {car.model}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: '💰 Price', key: 'price', format: v => `$${v.toLocaleString()}` },
+                    { label: '📅 Year', key: 'year' },
+                    { label: '⛽ Fuel', key: 'fuel' },
+                    { label: '🏎️ Speed', key: 'speed' },
+                    { label: '🔋 Range', key: 'range' },
+                  ].map((row, i) => (
+                    <tr key={row.key} style={{ background: i % 2 === 0 ? '#f8fafc' : '#fff' }}>
+                      <td style={{ padding: '15px', fontWeight: 'bold', textAlign: 'left', borderBottom: '1px solid #e2e8f0' }}>{row.label}</td>
+                      {selectedCars.map(car => (
+                        <td key={car.id} style={{ padding: '15px', borderBottom: '1px solid #e2e8f0' }}>
+                          {row.format ? row.format(car[row.key]) : car[row.key]}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button
+              onClick={() => setSelectedCars([])}
+              style={{ marginTop: '20px', padding: '10px 20px', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Clear Comparison
+            </button>
+          </div>
+        )}
+
       </div>
     </div>
   );
