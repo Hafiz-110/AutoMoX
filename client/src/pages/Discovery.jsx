@@ -268,6 +268,16 @@ const Discovery = () => {
           </div>
         )}
 
+              const msg = prompt("How can we help you today? (e.g., 'Is the Tesla available?')");
+              if(msg) {
+                axios.post('http://localhost:5000/api/wishlist', {
+                  userId: "User1",
+                  email: "junayedazuz530@gmail.com",
+                  type: 'inquiry',
+                  note: msg
+                });
+                alert("Your message has been sent to the dealer! 📩");
+              }
       </div>
     </div>
   );
