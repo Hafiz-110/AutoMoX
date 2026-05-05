@@ -1,23 +1,19 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom'; // 1. Added useNavigate
 
 const VehiclePersonalization = () => {
-    // --- STEP 1: GRAB DATA FROM THE URL ---
+    const navigate = useNavigate(); // 2. Initialize navigate
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     
-    // Get the image and price passed from the Discovery page
     const passedImg = queryParams.get('img');
     const passedPrice = parseInt(queryParams.get('price')) || 35000;
     const carModel = queryParams.get('model') || "Vehicle";
 
-    // --- STEP 2: SET UP STATE ---
     const [selectedColor, setSelectedColor] = useState('original');
     const [addons, setAddons] = useState({ rims: false, interior: false });
     const [serverPrice, setServerPrice] = useState(null);
 
-    // Feature 13: Image Mapping
-    // If 'original' is selected, we use the image from the Discovery page
     const carImages = {
         original: passedImg || 'https://placehold.co/500x300?text=No+Image+Found',
         silver: 'https://placehold.co/500x300/silver/white?text=Silver+Preview',
@@ -25,7 +21,6 @@ const VehiclePersonalization = () => {
         blue: 'https://placehold.co/500x300/blue/white?text=Blue+Preview',
     };
 
-    // Feature 14: Local Price Calculation (Fallback)
     const calculateTotal = () => {
         let total = passedPrice;
         if (addons.rims) total += 1500;
@@ -33,7 +28,6 @@ const VehiclePersonalization = () => {
         return total;
     };
 
-    // Handle Backend Price Sync
     const handleAddonToggle = async (type) => {
         const newAddons = { ...addons, [type]: !addons[type] };
         setAddons(newAddons);
@@ -53,9 +47,26 @@ const VehiclePersonalization = () => {
 
     return (
         <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Segoe UI, sans-serif' }}>
+            
+            {/* --- NEW HEADER WITH ADMIN PORTAL LINK --- */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '800px', margin: '0 auto 40px auto' }}>
+                <button 
+                    onClick={() => navigate('/')} 
+                    style={{ background: '#f1f5f9', border: 'none', padding: '10px 20px', borderRadius: '10px', cursor: 'pointer' }}
+                >
+                    ⬅️ Back to Discovery
+                </button>
+                
+                <button 
+                    onClick={() => navigate('/admin')}
+                    style={{ background: '#1e293b', color: 'white', padding: '10px 20px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                    🛡️ Dealer Admin Portal
+                </button>
+            </div>
+
             <h2 style={{ fontSize: '2rem', marginBottom: '20px' }}>Personalize Your {carModel}</h2>
 
-            {/* FIX FOR image_10efe0.png: Visual Preview */}
             <div style={{ marginBottom: '30px' }}>
                 <img 
                     src={carImages[selectedColor]} 
@@ -93,7 +104,6 @@ const VehiclePersonalization = () => {
     );
 };
 
-// Simple reusable style for buttons
 const btnStyle = {
     padding: '10px 20px',
     borderRadius: '8px',

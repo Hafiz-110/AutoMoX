@@ -2,10 +2,7 @@ const Car = require('../models/Car');
 const WishlistItem = require('../models/WishlistItem');
 const { sendPriceDropEmail } = require('../utils/emailService');
 
-// ─────────────────────────────────────────────
 // Feature 15: Add car by VIN (auto-populate data)
-// POST /api/admin/cars/vin-lookup
-// ─────────────────────────────────────────────
 exports.vinLookup = async (req, res) => {
     const { vin } = req.body;
     if (!vin || vin.length !== 17) {
@@ -13,13 +10,11 @@ exports.vinLookup = async (req, res) => {
     }
 
     try {
-        // Check for duplicate VIN
         const existing = await Car.findOne({ vin: vin.toUpperCase() });
         if (existing) {
             return res.status(409).json({ error: 'A car with this VIN already exists in inventory.' });
         }
 
-        // Call NHTSA free public API to decode VIN
         const nhtsaUrl = `https://vpic.nhtsa.dot.gov/api/vehicles/decodevin/${vin}?format=json`;
         const response = await fetch(nhtsaUrl);
         const data = await response.json();
@@ -53,10 +48,7 @@ exports.vinLookup = async (req, res) => {
     }
 };
 
-// ─────────────────────────────────────────────
 // Feature 15: Create new car listing
-// POST /api/admin/cars
-// ─────────────────────────────────────────────
 exports.createCar = async (req, res) => {
     try {
         const car = new Car(req.body);
@@ -70,23 +62,17 @@ exports.createCar = async (req, res) => {
     }
 };
 
-// ─────────────────────────────────────────────
 // Feature 16: Update car (price, stock, specs)
-// PATCH /api/admin/cars/:id
-// ─────────────────────────────────────────────
 exports.updateCar = async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
-
-        // Prevent overwriting VIN
         delete updates.vin;
 
         const oldCar = await Car.findById(id);
         if (!oldCar) return res.status(404).json({ error: 'Car not found.' });
 
         const oldPrice = oldCar.price;
-
         const updatedCar = await Car.findByIdAndUpdate(id, updates, { new: true, runValidators: true });
 
         // Feature 20: If price dropped, notify wishlisted users
@@ -115,10 +101,7 @@ exports.updateCar = async (req, res) => {
     }
 };
 
-
 // Feature 17: Delete or Archive car listing
-// DELETE /api/admin/cars/:id?archive=true
-// ─────────────────────────────────────────────
 exports.deleteCar = async (req, res) => {
     try {
         const { id } = req.params;
@@ -140,8 +123,6 @@ exports.deleteCar = async (req, res) => {
 };
 
 // Feature 18: Analytics Dashboard
-// GET /api/admin/analytics
-// ─────────────────────────────────────────────
 exports.getAnalytics = async (req, res) => {
     try {
         const [
@@ -153,27 +134,23 @@ exports.getAnalytics = async (req, res) => {
             fuelBreakdown,
             recentListings,
         ] = await Promise.all([
-            // Total cars
             Car.countDocuments({ stockStatus: { $ne: 'archived' } }),
 
-            // Count by stock status
             Car.aggregate([
                 { $group: { _id: '$stockStatus', count: { $sum: 1 } } }
             ]),
 
-            // Total inventory value (available + reserved only)
+            // FIXED: use $ne instead of $in so cars with null/missing stockStatus are included
             Car.aggregate([
-                { $match: { stockStatus: { $in: ['available', 'reserved'] } } },
+                { $match: { stockStatus: { $ne: 'archived' } } },
                 { $group: { _id: null, totalValue: { $sum: '$price' }, avgPrice: { $avg: '$price' } } }
             ]),
 
-            // Top 5 most viewed cars
             Car.find({ stockStatus: { $ne: 'archived' } })
                 .sort({ viewCount: -1 })
                 .limit(5)
                 .select('make model year price viewCount stockStatus images'),
 
-            // Breakdown by make
             Car.aggregate([
                 { $match: { stockStatus: { $ne: 'archived' } } },
                 { $group: { _id: '$make', count: { $sum: 1 } } },
@@ -181,13 +158,11 @@ exports.getAnalytics = async (req, res) => {
                 { $limit: 8 }
             ]),
 
-            // Breakdown by fuel type
             Car.aggregate([
                 { $match: { stockStatus: { $ne: 'archived' } } },
                 { $group: { _id: '$fuelType', count: { $sum: 1 } } }
             ]),
 
-            // Recently added (last 5)
             Car.find().sort({ _id: -1 }).limit(5).select('make model year price stockStatus createdAt'),
         ]);
 
@@ -208,8 +183,3 @@ exports.getAnalytics = async (req, res) => {
         res.status(500).json({ error: 'Failed to load analytics.' });
     }
 };
-
-// ─────────────────────────────────────────────
-
-
-// ─────────────────────────────────────────────

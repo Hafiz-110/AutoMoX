@@ -13,18 +13,11 @@
     "eject": "react-scripts eject"
   },
   "dependencies": {
-<<<<<<< HEAD
     "axios": "^1.15.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.14.2",
     "web-vitals": "^2.1.4"
-=======
-    "axios": "^1.13.6",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "react-router-dom": "^7.14.2"
->>>>>>> origin/feat-17_18
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
